@@ -287,8 +287,8 @@ const svgToImage = () => {
     throw new Error('dom not fount')
   }
   const canvas = document.createElement('canvas')
-  canvas.width = svgElement.clientWidth
-  canvas.height = svgElement.clientHeight
+  canvas.width = (svgElement as HTMLDivElement).clientWidth
+  canvas.height = (svgElement as HTMLDivElement).clientHeight
   const ctx = canvas.getContext('2d')
   const data = new XMLSerializer().serializeToString(svgElement)
   const svg = new Blob([data], {type: 'image/svg+xml;charset=utf-8'})
