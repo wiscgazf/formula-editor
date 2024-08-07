@@ -10,16 +10,22 @@ export default defineConfig({
     emptyOutDir: true,
     target: 'modules',
     outDir: 'lib',
-    minify: false,
     assetsInlineLimit: 0,
     rollupOptions: {
       external: ['vue'],
-      output: {
-        // 在 UMD 构建模式下为这些外部化的依赖提供一个全局变量
-        globals: {
-          vue: 'Vue',
+      input: ['./src/packages/index.ts'],
+      output: [
+        {
+          format: 'es',
+          entryFileNames: '[name].js',
+          dir: 'dist/es'
         },
-      }
+        {
+          format: 'cjs',
+          entryFileNames: '[name].js',
+          dir: 'dist/lib',
+        },
+      ]
     },
     lib: {
       entry: './src/packages/index.ts',
