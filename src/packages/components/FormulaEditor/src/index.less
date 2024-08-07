@@ -12,31 +12,24 @@
       align-items: center;
 
       .tool-item {
+        position: relative;
         text-align: center;
         padding: 6px 10px;
         background-color: #f0f2f5;
         border-radius: 4px;
         margin-right: 10px;
-        text-align: center;
         cursor: pointer;
         user-select: none;
-        position: relative;
-        pointer-events: painted;
-        font-family: Monaco,
-        Lucida Console,
-        Liberation Mono,
-        DejaVu Sans Mono,
-        Bitstream Vera Sans Mono,
-        Courier New,
-        monospace;
         font-size: 14px;
         transition: background-color linear 0.15s;
+        display: flex;
+        align-items: center;
 
         &:hover {
           background-color: #e2e6ea;
         }
 
-        &.fx {
+        .fx {
           display: flex;
           align-items: center;
         }
@@ -49,12 +42,13 @@
           width: 12px;
         }
 
-        .font-icon{
+        .font-icon {
           width: 10px;
         }
 
         .title {
           margin: 0 5px;
+          font-family: 'Microsoft YaHei UI', 'Microsoft YaHei', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
         }
 
         input[type="color"] {
@@ -75,10 +69,141 @@
         input[type="color"]::-webkit-color-swatch {
           border: 0;
         }
+
+        .fade-enter-from, .fade-leave-to {
+          transform: translateY(-5%);
+          opacity: 0;
+        }
+
+        .fade-enter-active, .fade-leave-active {
+          transition: all linear 0.15s;
+        }
+
+        .popover {
+          position: absolute;
+          padding: 8px;
+          top: 35px;
+          left: 0;
+          z-index: 5;
+          background: #fff;
+          box-shadow: 0px 0px 12px rgba(0, 0, 0, .12);
+
+          .font-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 4px;
+            padding: 0 8px;
+            height: 32px;
+            border-radius: 4px;
+            cursor: pointer;
+            white-space: nowrap;
+
+            &.font2 {
+              font-family: italic;
+            }
+
+            &.font3 {
+              font-weight: bold;
+            }
+
+            &.font4 {
+              font-weight: bold;
+              font-family: italic;
+            }
+
+            &.font5 {
+              text-decoration: underline;
+            }
+
+            &:hover {
+              background: #ebecf0;
+            }
+
+            &:last-child {
+              margin-bottom: 0;
+            }
+          }
+        }
       }
 
-      .mr-a {
+      .r-switch {
+        display: flex;
+        align-items: center;
         margin-left: auto;
+
+        & > span {
+          margin-left: 5px;
+          transition: color linear 0.15s;
+
+          &.latex-active {
+            color: #409eff;
+          }
+        }
+      }
+
+      .switch-box {
+        width: 40px;
+      }
+
+      .switch-box .switch {
+        /* 隐藏checkbox默认样式 */
+        display: none;
+      }
+
+      .switch-box label {
+        /* 通过label扩大点击热区 */
+        position: relative;
+        display: block;
+        margin: 1px;
+        height: 20px;
+        cursor: pointer;
+      }
+
+      .switch-box label::before {
+        /* before设置前滚动小圆球 */
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        margin-top: -8px;
+        margin-left: -8px;
+        width: 16px;
+        height: 16px;
+        border-radius: 100%;
+        background-color: #fff;
+        box-shadow: 1px 1px 1px 1px rgba(0, 0, 0, 0.06);
+        /* 通过transform、transition属性控制元素过渡进而形成css3动画 */
+        -webkit-transform: translateX(-9px);
+        -moz-transform: translateX(-9px);
+        transform: translateX(-9px);
+        -webkit-transition: all 0.3s ease;
+        -moz-transition: all 0.3s ease;
+        transition: all 0.3s ease;
+      }
+
+      .switch-box .switch:checked ~ label::before {
+        /* 语义：被选中的类名为"switch"元素后面的label元素里的伪类元素，进行更改css样式 */
+        /* 形成伪类结构选择器：":"冒号加布尔值"checked" */
+        /* " Ele1 ~ Ele2 "波浪号在css的作用：连接的元素必须有相同的父元素，选择出现在Ele1后的Ele2（但不必跟在Ele1，也就是说可以并列）  */
+        -webkit-transform: translateX(9px);
+        -moz-transform: translateX(9px);
+        transform: translateX(9px);
+      }
+
+      .switch-box label::after {
+        /* after设置滚动前背景色 */
+        content: "";
+        display: block;
+        border-radius: 10px;
+        height: 20px;
+        background-color: #dcdfe6;
+        -webkit-transition: all 0.3s ease;
+        -moz-transition: all 0.3s ease;
+        transition: all 0.3s ease;
+      }
+
+      .switch-box .switch:checked ~ label::after {
+        background-color: #409eff;
       }
     }
 
@@ -109,31 +234,20 @@
       .input-latex {
         position: relative;
 
-        .latex-el {
-          :deep(.el-textarea__inner) {
-            height: 300px !important;
-            font-size: 18px;
-            white-space: pre-wrap;
-            word-break: break-word;
-            letter-spacing: 1px;
-            display: block;
-            color: rgba(0, 0, 0, 0.01);
-            caret-color: #333;
-            background: rgba(0, 0, 0, 0);
-            resize: none;
-            line-height: 1.5;
-          }
-
-          position: absolute;
-          z-index: 2;
-          top: 0;
-          left: 0;
+        .public-s {
+          width: 100%;
+          height: 300px;
+          white-space: pre-wrap;
+          word-break: break-word;
+          letter-spacing: 1px;
+          display: block;
+          line-height: 1.5;
           cursor: text;
           background-clip: padding-box;
+          font-size: 18px;
+          padding: 5px 11px;
           box-sizing: border-box;
-          outline: none;
           border-radius: 4px;
-          border-color: #ced2d9;
           font-family: Monaco,
           Lucida Console,
           Liberation Mono,
@@ -143,11 +257,25 @@
           monospace;
         }
 
+        .latex-el {
+          color: rgba(0, 0, 0, 0.01);
+          caret-color: #333;
+          background: rgba(0, 0, 0, 0);
+          resize: none;
+          position: absolute;
+          z-index: 2;
+          top: 0;
+          left: 0;
+          outline: none;
+          transition: border-color linear 0.15s;
+          border-color: #ced2d9;
+
+          &:focus, &:hover {
+            border-color: #409eff;
+          }
+        }
+
         #latex-cover {
-          white-space: pre-wrap;
-          word-break: break-word;
-          letter-spacing: 1px;
-          height: 300px;
           overflow-y: auto;
           color: #333;
           caret-color: #333;
@@ -156,20 +284,6 @@
           z-index: 1;
           top: 0;
           left: 0;
-          cursor: text;
-          background-clip: padding-box;
-          font-size: 18px;
-          padding: 5px 11px;
-          box-sizing: border-box;
-          border-radius: 4px;
-          line-height: 1.5;
-          font-family: Monaco,
-          Lucida Console,
-          Liberation Mono,
-          DejaVu Sans Mono,
-          Bitstream Vera Sans Mono,
-          Courier New,
-          monospace;
         }
       }
     }

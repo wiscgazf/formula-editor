@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {defineOptions, ref, onMounted, nextTick, computed} from 'vue'
+import {defineOptions, ref, onMounted, nextTick, computed, onUnmounted} from 'vue'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-expect-error
 import HighlightLatex from '../mathquill/highlight'
@@ -63,6 +63,9 @@ const latexColor = ref<string>('#333333')
 // 选中的文本
 const selectText = ref<string>('')
 
+// 是否显示字体列表
+const fontVisible = ref<boolean>(false)
+
 // mathjax 预览指令
 const vMathjax = {
   created: (el: HTMLDivElement) => {
@@ -89,7 +92,20 @@ onMounted(() => {
       initFormulaEditor()
     })
   }
+
+  document.addEventListener('click', clickCb)
 })
+
+onUnmounted(() => {
+  document.removeEventListener('click', clickCb)
+})
+
+// 全局监听click时间
+const clickCb = () => {
+  if (fontVisible.value) {
+    fontVisible.value = false
+  }
+}
 
 // 初始化 mathquil 编辑器
 const initFormulaEditor = () => {
@@ -144,6 +160,7 @@ const colorChange = () => {
 
 // 设置字体
 const settingFont = (L: string) => {
+  fontVisible.value = false
   let n = selectText.value
   if (!n) {
     return
@@ -231,14 +248,16 @@ const initFormulaPreview = (dom: HTMLDivElement) => {
 }
 
 // 切换编辑器类型
-const changeEditType = (isLatex: boolean) => {
+const changeEditType = () => {
+  if (isLatex.value) {
+    latexVal.value = mathQuillIns.value?.latex()
+    mathQuillIns.value = null
+  }
   nextTick(() => {
-    if (isLatex) {
-      latexVal.value = mathQuillIns.value?.latex()
-      mathQuillIns.value = null
+    if (isLatex.value) {
       latexEl.value?.focus()
       highLightIns.value = new HighlightLatex(
-        '.latex-el .el-textarea__inner',
+        '.latex-el',
         '#latex-cover',
       )
     } else {
@@ -258,62 +277,55 @@ const latexChange = () => {
   <div class="formula-main">
     <div class="input-main">
       <div class="input-tool">
-        <div class="tool-item fx">
-          <img class="color" src="../img/color.png" alt=""/>
-          <span class="title">颜色</span>
-          <img class="arrow-down" src="../img/arrow-down.png" alt=""/>
+        <div class="tool-item">
+          <div class="fx">
+            <img class="color" src="../img/color.png" alt=""/>
+            <span class="title">颜色</span>
+            <img class="arrow-down" src="../img/arrow-down.png" alt=""/>
+          </div>
           <input type="color" @input="colorChange" v-model="latexColor"/>
         </div>
-        <el-popover
-            placement="bottom-start"
-            trigger="click"
-            :show-arrow="false"
-            title=""
-            :offset="0"
-            :width="100"
-            popper-class="font-popover"
-        >
-          <template #reference>
-            <div class="tool-item">
-              <img class="font-icon" src="../img/font.png" alt=""/>
-              <span class="title">字体</span>
+        <div class="tool-item">
+          <div class="fx" @click.stop="fontVisible = true">
+            <img class="font-icon" src="../img/font.png" alt=""/>
+            <span class="title">字体</span>
+            <img class="arrow-down" src="../img/arrow-down.png" alt=""/>
+          </div>
+          <Transition name="fade">
+            <div class="popover" v-if="fontVisible">
+              <div
+                  :class="['font-item', 'font' + item.id]"
+                  v-for="item in fontsList"
+                  :key="item.id"
+                  @click="settingFont(item.latex)"
+              >
+                {{ item.text }}
+              </div>
             </div>
-          </template>
-          <template v-slot:content>
-            <div
-                :class="['font-item', 'font' + item.id]"
-                v-for="item in fontsList"
-                :key="item.id"
-                @click="settingFont(item.latex)"
-            >
-              {{ item.text }}
-            </div>
-          </template>
-        </el-popover>
-        <el-switch
-            v-model="isLatex"
-            class="mr-a"
-            active-text="Latex"
-            @change="changeEditType"
-        />
+          </Transition>
+        </div>
+        <div class="r-switch">
+          <div class="switch-box">
+            <input v-model="isLatex" @change="changeEditType" id="switchButton" type="checkbox" class="switch"/>
+            <label for="switchButton"></label>
+          </div>
+          <span :class="{'latex-active': isLatex}">Latex</span>
+        </div>
       </div>
       <div class="input-area">
         <div class="input-ui" v-if="!isLatex">
           <div id="quill-el" ref="mathQuillEl"></div>
         </div>
         <div class="input-latex" v-else>
-          <el-input
+          <textarea
               ref="latexEl"
-              class="latex-el"
+              class="latex-el public-s"
               v-model="latexVal"
               type="textarea"
-              show-word-limit
-              maxlength="1000"
-              :autosize="false"
               @input="latexChange"
               placeholder="请输入有效的Latex公式"
           />
-          <div id="latex-cover"></div>
+          <div id="latex-cover" class="public-s"></div>
         </div>
       </div>
     </div>
@@ -326,43 +338,6 @@ const latexChange = () => {
 
 <style lang="css">
 @import "../mathquill/mathquill.css";
-
-.font-popover {
-  .font-item {
-    display: flex;
-    align-items: center;
-    margin-bottom: 4px;
-    padding: 0 8px;
-    height: 32px;
-    border-radius: 4px;
-    cursor: pointer;
-
-    &.font2 {
-      font-family: italic;
-    }
-
-    &.font3 {
-      font-weight: bold;
-    }
-
-    &.font4 {
-      font-weight: bold;
-      font-family: italic;
-    }
-
-    &.font5 {
-      text-decoration: underline;
-    }
-
-    &:hover {
-      background: #ebecf0;
-    }
-
-    &:last-child {
-      margin-bottom: 0;
-    }
-  }
-}
 </style>
 
 <style lang="less" scoped>
