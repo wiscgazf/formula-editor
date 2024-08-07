@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {defineOptions, ref, onMounted, nextTick, computed, onUnmounted} from 'vue'
+import {defineOptions, ref, onMounted, nextTick, computed, onUnmounted, defineExpose} from 'vue'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-expect-error
 import HighlightLatex from '../mathquill/highlight'
@@ -247,6 +247,67 @@ const initFormulaPreview = (dom: HTMLDivElement) => {
   })
 }
 
+// 获取svg
+const svgHtml = () => {
+  let html = window.MathJax.tex2svg(calcLatexVal.value, {em: 12, ex: 6, display: false})
+  let text = html.firstChild
+  return text.outerHTML
+}
+
+// 获取latex
+const latexText = () => {
+  return latexVal.value
+}
+
+// 导出 svg
+const exportSvg = () => {
+  //获取svg
+  let dom = document.querySelector('.latex-viewer>.MathJax')?.firstChild
+  if (!dom) {
+    throw new Error('dom not fount')
+  }
+  // 将 SVG 节点转换为 XML 字符串
+  const svgString = new XMLSerializer().serializeToString(dom)
+
+  // 下载 SVG 文件
+  const file = new Blob([svgString], {type: 'image/svg+xml'})
+  const url = URL.createObjectURL(file)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = 'math.svg'
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  URL.revokeObjectURL(url)
+}
+
+const svgToImage = () => {
+  const svgElement = document.querySelector('.latex-viewer>.MathJax')?.firstChild
+  if (!svgElement) {
+    throw new Error('dom not fount')
+  }
+  const canvas = document.createElement('canvas')
+  canvas.width = svgElement.clientWidth
+  canvas.height = svgElement.clientHeight
+  const ctx = canvas.getContext('2d')
+  const data = new XMLSerializer().serializeToString(svgElement)
+  const svg = new Blob([data], {type: 'image/svg+xml;charset=utf-8'})
+  const url = URL.createObjectURL(svg)
+  const image = new Image()
+  image.onload = function () {
+    ctx?.drawImage(image, 0, 0)
+    URL.revokeObjectURL(url)
+    // 导出为图片
+    const png = canvas.toDataURL('image/png')
+    // 下载图片
+    const a = document.createElement('a')
+    a.href = png
+    a.download = 'math.png'
+    a.click()
+  }
+  image.src = url
+}
+
 // 切换编辑器类型
 const changeEditType = () => {
   if (isLatex.value) {
@@ -271,6 +332,13 @@ const changeEditType = () => {
 const latexChange = () => {
   highLightIns.value?.textareaToDiv()
 }
+
+defineExpose({
+  latexText,
+  svgHtml,
+  exportSvg,
+  svgToImage
+})
 </script>
 
 <template>
@@ -342,4 +410,8 @@ const latexChange = () => {
 
 <style lang="less" scoped>
 @import "./index.less";
+
+.CtxtMenu_MenuFrame {
+  display: none;
+}
 </style>

@@ -296,6 +296,7 @@
       font-size: 20px;
       border-radius: 4px;
       padding: 2px 16px;
+      overflow-x: auto;
 
       :deep(.MathJax) {
         text-align: left;
@@ -307,5 +308,32 @@
       font-size: 14px;
       color: rgb(33, 35, 41);
     }
+  }
+
+  * {
+    scrollbar-color: var(--el-scrollbar-bg-color) var(--el-fill-color-light)
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px
+  }
+
+  ::-webkit-scrollbar:horizontal {
+    height: 6px
+  }
+
+  ::-webkit-scrollbar-track {
+    border-radius: 10px
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: #0003;
+    border-radius: 10px;
+    transition: all .2s ease-in-out
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    cursor: pointer;
+    background-color: #0000004d
   }
 }

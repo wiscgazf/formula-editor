@@ -9,7 +9,7 @@ export default defineConfig({
   build: {
     emptyOutDir: true,
     target: 'modules',
-    outDir: 'lib',
+    outDir: 'dist',
     assetsInlineLimit: 0,
     rollupOptions: {
       external: ['vue'],
